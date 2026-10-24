@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carnet Pelican</title>
+<style>
+:root{--bg:#f4f1ec;--card:#fff;--ink:#1d2a33;--muted:#6b7680;--line:#e2ddd5;--accent:#d9773f;--err:#b3261e}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141a1f;--card:#1d252c;--ink:#e8edf1;--muted:#97a3ad;--line:#2d3841;--accent:#e58a55;--err:#f2b8b5}}
+:root[data-theme="dark"]{--bg:#141a1f;--card:#1d252c;--ink:#e8edf1;--muted:#97a3ad;--line:#2d3841;--accent:#e58a55;--err:#f2b8b5}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px}
+.gate{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 24px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.logo{width:52px;height:52px;border-radius:14px;background:var(--accent);display:grid;place-items:center;margin-bottom:16px}
+h1{font-size:21px;margin:0 0 4px;letter-spacing:-.01em}
+p{margin:0 0 20px;color:var(--muted);font-size:14.5px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.row{display:flex;gap:8px}
+input{flex:1;min-width:0;font:inherit;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+input:focus{outline:2px solid var(--accent);outline-offset:1px}
+button{font:inherit;font-weight:600;padding:11px 16px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+.chk{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:var(--muted);font-weight:400}
+.chk input{flex:none;width:16px;height:16px}
+.msg{min-height:22px;margin-top:12px;font-size:13.5px;color:var(--muted)}
+.msg.err{color:var(--err)}
+.note{margin-top:18px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<form class="gate" id="gate" autocomplete="off">
+  <div class="logo" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v14"/><path d="M12 4l7 11h-7"/><path d="M11 6L6 15h5"/><path d="M3 19c3 2 15 2 18 0"/></svg></div>
+  <h1>Carnet d’entretien – SY Pelican</h1>
+  <p>Accès protégé. Saisissez le mot de passe qui vous a été communiqué.<br><span lang="en">Protected access – enter the password you were given.</span></p>
+  <label for="pw">Mot de passe / Password</label>
+  <div class="row"><input id="pw" type="password" required autofocus><button id="go" type="submit">Ouvrir</button></div>
+  <label class="chk"><input type="checkbox" id="keep"> Rester connecté sur cet appareil (session)</label>
+  <div class="msg" id="msg" role="status"></div>
+  <div class="note">Le contenu est chiffré (AES‑256) ; il n’est lisible qu’avec le mot de passe.</div>
+</form>
+<script>
+(function(){
+var SALT="ZIjQwTXTtT7AIKHYAIT5Zg==",IT=600000,KS="pelican-share-key";
+var f=document.getElementById("gate"),pw=document.getElementById("pw"),go=document.getElementById("go"),msg=document.getElementById("msg"),keep=document.getElementById("keep");
+function b64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;}
+function say(t,e){msg.textContent=t;msg.className="msg"+(e?" err":"");}
+async function derive(p){var k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(SALT),iterations:IT,hash:"SHA-256"},k,{name:"AES-GCM",length:256},true,["decrypt"]);}
+async function dec(key,txt){var u=b64(txt.trim());var p=await crypto.subtle.decrypt({name:"AES-GCM",iv:u.slice(0,12)},key,u.slice(12));return gunzipBuf(p);}
+async function gunzipBuf(buf){var s=new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"));return new Response(s).arrayBuffer();}
+async function gunzip(buf){var s=new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"));return new Response(s).text();}
+function hook(key){var of=window.fetch.bind(window);
+  window.fetch=function(u,o){var s=typeof u==="string"?u:(u&&u.url)||"";
+    if(/(^|\/)(docidx(-share)?\.json|pg\/[^\/?#]+\.json)([?#].*)?$/.test(s)){
+      var t=s.replace(/docidx(-share)?\.json/,"docidx.txt").replace(/(pg\/[^\/?#]+)\.json/,"$1.txt");
+      return of(t,o).then(function(r){if(!r.ok)return r;return r.text().then(function(b){return dec(key,b);}).then(function(p){return new Response(p,{status:200,headers:{"Content-Type":"application/json"}});});});}
+    return of(u,o);};}
+function mount(html){var d=new DOMParser().parseFromString(html,"text/html");
+  document.documentElement.lang=d.documentElement.lang||"fr";
+  document.head.innerHTML="";document.body.innerHTML="";document.body.removeAttribute("style");
+  Array.prototype.forEach.call(d.documentElement.attributes,function(a){document.documentElement.setAttribute(a.name,a.value);});
+  Array.prototype.forEach.call(d.body.attributes,function(a){document.body.setAttribute(a.name,a.value);});
+  function copy(src,dst){Array.prototype.forEach.call(src.childNodes,function(n){
+    if(n.nodeName==="SCRIPT"){var s=document.createElement("script");Array.prototype.forEach.call(n.attributes,function(a){s.setAttribute(a.name,a.value);});s.text=n.text;dst.appendChild(s);}
+    else dst.appendChild(document.importNode(n,true));});}
+  copy(d.head,document.head);copy(d.body,document.body);}
+async function open_(key){var r=await fetch("data.txt",{cache:"no-store"});if(!r.ok)throw new Error("net");
+  var p=await dec(key,await r.text());say("Ouverture du carnet…");var html=new TextDecoder().decode(p);hook(key);mount(html);}
+async function tryStored(){var j=null;try{j=sessionStorage.getItem(KS);}catch(e){}
+  if(!j)return;try{var k=await crypto.subtle.importKey("jwk",JSON.parse(j),{name:"AES-GCM"},true,["decrypt"]);say("Ouverture du carnet…");await open_(k);}catch(e){try{sessionStorage.removeItem(KS);}catch(_){}say("");}}
+f.addEventListener("submit",async function(e){e.preventDefault();go.disabled=true;say("Vérification…");
+  try{var k=await derive(pw.value);await open_(k);
+    if(keep.checked){try{sessionStorage.setItem(KS,JSON.stringify(await crypto.subtle.exportKey("jwk",k)));}catch(_){}}
+  }catch(err){go.disabled=false;say(err&&err.message==="net"?"Impossible de charger le carnet, vérifiez la connexion.":"Mot de passe incorrect.",true);pw.select();}});
+if(!(window.crypto&&crypto.subtle&&window.DecompressionStream)){say("Navigateur trop ancien : utilisez une version récente de Safari, Chrome, Firefox ou Edge.",true);go.disabled=true;}
+else tryStored();
+})();
+</script>
+</body>
+</html>
