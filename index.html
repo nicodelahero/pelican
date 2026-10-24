@@ -55,12 +55,15 @@ fit();addEventListener("resize",fit);})();
 </script>
 <script>
 (function(){
-var SALT="ZIjQwTXTtT7AIKHYAIT5Zg==",IT=600000,KS="pelican-share-key";
+var KS="pelican-share-key";
 var f=document.getElementById("gate"),pw=document.getElementById("pw"),go=document.getElementById("go"),msg=document.getElementById("msg"),keep=document.getElementById("keep");
 function b64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;}
 function say(t,e){msg.textContent=t;msg.className="msg"+(e?" err":"");}
-async function derive(p){var k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveKey"]);
-  return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(SALT),iterations:IT,hash:"SHA-256"},k,{name:"AES-GCM",length:256},true,["decrypt"]);}
+async function derive(p){var r=await fetch("wrap.json",{cache:"no-store"});if(!r.ok)throw new Error("net");var w=await r.json();
+  var k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveKey"]);
+  var kek=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(w.salt),iterations:w.it,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["decrypt"]);
+  var mk=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(w.iv)},kek,b64(w.ct));
+  return crypto.subtle.importKey("raw",mk,{name:"AES-GCM"},true,["decrypt"]);}
 async function dec(key,txt){var u=b64(txt.trim());var p=await crypto.subtle.decrypt({name:"AES-GCM",iv:u.slice(0,12)},key,u.slice(12));return gunzipBuf(p);}
 async function gunzipBuf(buf){var s=new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"));return new Response(s).arrayBuffer();}
 async function gunzip(buf){var s=new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"));return new Response(s).text();}
@@ -78,7 +81,12 @@ function mount(html){var d=new DOMParser().parseFromString(html,"text/html");
   function copy(src,dst){Array.prototype.forEach.call(src.childNodes,function(n){
     if(n.nodeName==="SCRIPT"){var s=document.createElement("script");Array.prototype.forEach.call(n.attributes,function(a){s.setAttribute(a.name,a.value);});s.text=n.text;dst.appendChild(s);}
     else dst.appendChild(document.importNode(n,true));});}
-  copy(d.head,document.head);copy(d.body,document.body);}
+  copy(d.head,document.head);copy(d.body,document.body);logoutBtn();}
+function logoutBtn(){var b=document.createElement("button");b.type="button";b.id="pub-logout";b.title="Se déconnecter / Log out";
+  b.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span>Déconnexion</span>';
+  b.setAttribute("style","position:fixed;top:12px;right:14px;z-index:2147483000;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.92);color:#1d2a33;font:600 13px/1 system-ui,-apple-system,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.15);cursor:pointer");
+  b.addEventListener("click",function(){try{sessionStorage.removeItem(KS);}catch(e){}location.reload();});
+  document.body.appendChild(b);}
 async function open_(key){var r=await fetch("data.txt",{cache:"no-store"});if(!r.ok)throw new Error("net");
   var p=await dec(key,await r.text());say("Ouverture du carnet…");var html=new TextDecoder().decode(p);hook(key);mount(html);}
 async function tryStored(){var j=null;try{j=sessionStorage.getItem(KS);}catch(e){}
