@@ -4,54 +4,92 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Carnet Pelican</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--card:rgba(255,255,255,.82);--ink:#13222c;--muted:#4f5f69;--line:rgba(19,34,44,.14);--accent:#d9773f;--err:#b3261e;--field:rgba(255,255,255,.9);--bg:#0c3d6b}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--card:rgba(14,24,32,.72);--ink:#eef3f6;--muted:#b4c0c8;--line:rgba(255,255,255,.16);--accent:#e58a55;--err:#f2b8b5;--field:rgba(255,255,255,.08)}}
-:root[data-theme="dark"]{--card:rgba(14,24,32,.72);--ink:#eef3f6;--muted:#b4c0c8;--line:rgba(255,255,255,.16);--accent:#e58a55;--err:#f2b8b5;--field:rgba(255,255,255,.08)}
+:root{--paper:#f6f3ee;--ink:#0f2233;--soft:#4a5a68;--faint:#7c8893;--line:#d9d3c9;--accent:#a8481f;--btn:#0f2233;--err:#b3261e}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;align-items:center;padding:24px 16px;overflow:hidden}
-#bg{position:fixed;inset:0;background:#0c3d6b url("bg.jpg") no-repeat;background-size:cover;z-index:0}
-#bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,20,35,.45),rgba(5,20,35,0) 55%)}
-.gate{position:relative;z-index:1;width:100%;max-width:380px;margin-left:clamp(0px,6vw,96px);background:var(--card);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);border:1px solid var(--line);border-radius:18px;padding:26px 24px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
-.logo{width:48px;height:48px;border-radius:13px;background:var(--accent);display:grid;place-items:center;margin-bottom:14px}
-h1{font-size:21px;margin:0 0 4px;letter-spacing:-.01em}
-p{margin:0 0 18px;color:var(--muted);font-size:14.5px}
-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
-.row{display:flex;gap:8px}
-input{flex:1;min-width:0;font:inherit;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--field);color:var(--ink)}
-input:focus{outline:2px solid var(--accent);outline-offset:1px}
-button{font:inherit;font-weight:600;padding:11px 16px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer}
-button:disabled{opacity:.6;cursor:wait}
-.chk{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:var(--muted);font-weight:400}
-.chk input{flex:none;width:16px;height:16px}
-.msg{min-height:22px;margin-top:12px;font-size:13.5px;color:var(--muted)}
-.msg.err{color:var(--err)}
-.note{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
-.cap{position:fixed;right:14px;bottom:10px;z-index:1;font-size:11.5px;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.5)}
-@media (max-width:640px){body{align-items:flex-start;padding:16px}#bg::after{background:linear-gradient(180deg,rgba(5,20,35,.45),rgba(5,20,35,0) 60%)}.gate{margin:0 auto;padding:20px 18px}.gate p{margin-bottom:14px}.note{margin-top:10px}.cap{left:0;right:0;text-align:center}}
+body{margin:0;min-height:100vh;background:var(--paper);color:var(--ink);font:16px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.page{display:grid;grid-template-columns:minmax(380px,40%) 1fr;min-height:100vh}
+.panel{display:flex;flex-direction:column;justify-content:space-between;padding:40px clamp(28px,4.5vw,72px)}
+header{display:flex;align-items:center;justify-content:space-between}
+.mark{display:flex;align-items:center;gap:12px}
+.mark img{width:104px;height:auto}
+.mark span{font:600 12px/1.3 Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:3px;background:#fff}
+.lang button{border:0;background:none;border-radius:99px;padding:7px 13px;font:600 12px/1 Inter,sans-serif;letter-spacing:.08em;color:var(--soft);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+main{max-width:400px;margin:56px 0}
+.kicker{font:600 12px/1 Inter,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
+h1{font:500 clamp(40px,4.4vw,58px)/1.04 Fraunces,Georgia,serif;letter-spacing:-.02em;margin:0 0 16px}
+.lead{color:var(--soft);margin:0 0 32px}
+.field label{display:block;font:600 13px/1 Inter,sans-serif;color:var(--ink);margin:0 0 9px}
+.inrow{display:flex;gap:10px}
+#pw{flex:1;min-width:0;height:52px;padding:0 16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:500 17px/1 Inter,sans-serif;outline:0;transition:border-color .15s,box-shadow .15s}
+#pw:focus{border-color:var(--ink);box-shadow:0 0 0 4px rgba(15,34,51,.1)}
+#pw::placeholder{color:#a9b1b8}
+#go{height:52px;padding:0 20px;display:inline-flex;align-items:center;gap:8px;border:0;border-radius:12px;background:var(--btn);color:#fff;font:600 15px/1 Inter,sans-serif;cursor:pointer;transition:background .15s}
+#go:hover{background:#1d3a52}#go svg{transition:transform .2s}#go:hover svg{transform:translateX(3px)}
+#go:disabled{opacity:.6;cursor:wait}
+.row2{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;min-height:24px;flex-wrap:wrap}
+.chk{display:inline-flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);cursor:pointer}
+.chk input{width:17px;height:17px;accent-color:var(--ink);margin:0}
+.msg{font-size:14px;font-weight:500;color:var(--soft)}.msg.err{color:var(--err)}
+footer{border-top:1px solid var(--line);padding-top:22px;display:flex;gap:36px;align-items:flex-start}
+footer figure{margin:0;display:flex;flex-direction:column;gap:10px}
+footer figcaption{font:600 11px/1 Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+footer .lg{height:68px;display:flex;align-items:center}
+.p-st{width:240px;height:auto}.p-ex{width:120px;height:auto}
+.photo{position:relative;margin:16px 16px 16px 0;border-radius:22px;overflow:hidden;background:#0b2a45 url("bg.jpg") no-repeat 50% 74%/cover}
+.photo .cap{position:absolute;left:20px;bottom:20px;background:rgba(255,255,255,.94);color:var(--ink);font:600 13px/1 Inter,sans-serif;padding:9px 14px;border-radius:99px;display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+@media (max-width:820px){
+ .page{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}
+ .photo{order:-1;margin:12px 12px 0;height:34vh;min-height:220px;border-radius:18px;background-position:50% 80%}
+ .photo .cap{left:12px;bottom:12px;font-size:12px;padding:7px 11px}
+ .panel{padding:22px 22px 26px}
+ main{margin:30px 0 34px}h1{font-size:38px}.lead{margin-bottom:24px}
+ .mark img{width:82px}
+ footer{gap:28px}.p-st{width:190px}.p-ex{width:96px}}
+@media (max-width:380px){.mark span{display:none}}
 </style>
 </head>
 <body>
-<div id="bg" aria-hidden="true"></div>
-<div class="cap">SY Pelican au large de Moorea</div>
-<form class="gate" id="gate" autocomplete="off">
-  <div class="logo" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v14"/><path d="M12 4l7 11h-7"/><path d="M11 6L6 15h5"/><path d="M3 19c3 2 15 2 18 0"/></svg></div>
-  <h1>Carnet d’entretien – SY Pelican</h1>
-  <p>Accès protégé. Saisissez le mot de passe qui vous a été communiqué.<br><span lang="en">Protected access – enter the password you were given.</span></p>
-  <label for="pw">Mot de passe / Password</label>
-  <div class="row"><input id="pw" type="password" required autofocus><button id="go" type="submit">Ouvrir</button></div>
-  <label class="chk"><input type="checkbox" id="keep"> Rester connecté sur cet appareil (session)</label>
-  <div class="msg" id="msg" role="status"></div>
-  <div class="note">Le contenu est chiffré (AES‑256) ; il n’est lisible qu’avec le mot de passe.</div>
-</form>
+<div class="page">
+ <section class="panel">
+  <header>
+   <div class="mark"><img src="logo-pelican-cut.webp" alt="Le voyage de Pélican"><span>Le voyage<br>de Pélican</span></div>
+   <div class="lang" role="group" aria-label="Langue / Language"><button type="button" data-l="fr">FR</button><button type="button" data-l="en">EN</button></div>
+  </header>
+  <main>
+   <form id="gate" autocomplete="off">
+    <p class="kicker" data-t="kicker">Excess 14 · SY Pelican</p>
+    <h1 data-t="title">Carnet d’entretien</h1>
+    <p class="lead" data-t="lead">Accès réservé. Saisissez le mot de passe qui vous a été communiqué.</p>
+    <div class="field"><label for="pw" data-t="pw">Mot de passe</label>
+     <div class="inrow"><input id="pw" type="password" required autofocus><button id="go" type="submit"><span data-t="go">Entrer</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button></div></div>
+    <div class="row2"><label class="chk"><input type="checkbox" id="keep"> <span data-t="keep">Rester connecté</span></label><div class="msg" id="msg" role="status"></div></div>
+   </form>
+  </main>
+  <footer>
+   <figure><figcaption data-t="dealer">Concessionnaire</figcaption><div class="lg"><img src="logo-sailtahiti.png" alt="Sail Tahiti" class="p-st"></div></figure>
+   <figure><figcaption data-t="builder">Chantier</figcaption><div class="lg"><img src="logo-excess.png" alt="Excess Catamarans" class="p-ex"></div></figure>
+  </footer>
+ </section>
+ <div class="photo" role="img" aria-label="SY Pelican au large de Moorea"><span class="cap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span data-t="cap">Au large de Moorea</span></span></div>
+</div>
 <script>
-(function(){var FX=.5,FY=.737,IW=3694,IH=1100,el=document.getElementById("bg");
-function fit(){if(!el||!el.isConnected)return;var W=innerWidth,H=innerHeight,s=Math.max(W/IW,H/IH),w=IW*s,h=IH*s,m=W<=640;
- var tx=m?W/2:W*.66,ty=m?H*.8:H*.56;
- var x=Math.min(0,Math.max(W-w,tx-FX*w)),y=Math.min(0,Math.max(H-h,ty-FY*h));
- el.style.backgroundSize=w+"px "+h+"px";el.style.backgroundPosition=x+"px "+y+"px";}
-fit();addEventListener("resize",fit);})();
+var I18N={fr:{title:"Carnet d’entretien",lead:"Accès réservé. Saisissez le mot de passe qui vous a été communiqué.",kicker:"Excess 14 · SY Pelican",pw:"Mot de passe",go:"Entrer",keep:"Rester connecté",cap:"Au large de Moorea",dealer:"Concessionnaire",builder:"Chantier",
+  checking:"Vérification…",opening:"Ouverture du carnet…",wrong:"Mot de passe incorrect.",net:"Impossible de charger le carnet, vérifiez la connexion.",old:"Navigateur trop ancien : utilisez une version récente de Safari, Chrome, Firefox ou Edge.",logout:"Déconnexion",logoutT:"Se déconnecter"},
+ en:{title:"Maintenance log",lead:"Restricted access. Enter the password you were given.",kicker:"Excess 14 · SY Pelican",pw:"Password",go:"Enter",keep:"Stay signed in",cap:"Off Moorea",dealer:"Dealer",builder:"Builder",
+  checking:"Checking…",opening:"Opening the log…",wrong:"Wrong password.",net:"Could not load the log, check your connection.",old:"Browser too old: use a recent version of Safari, Chrome, Firefox or Edge.",logout:"Log out",logoutT:"Log out"}};
+var LG=(function(){try{var v=localStorage.getItem("pelican-lang");if(v==="en"||v==="fr")return v;}catch(e){}return /^fr/i.test(navigator.language||"fr")?"fr":"en";})();
+function T(k){return (I18N[LG]||I18N.fr)[k]||k;}
+function setLang(l){LG=l;try{localStorage.setItem("pelican-lang",l);}catch(e){}document.documentElement.lang=l;
+  document.querySelectorAll("[data-t]").forEach(function(el){el.textContent=T(el.getAttribute("data-t"));});
+  document.querySelectorAll(".lang button").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-l")===l?"true":"false");});}
+document.querySelectorAll(".lang button").forEach(function(b){b.addEventListener("click",function(){setLang(b.getAttribute("data-l"));});});
+setLang(LG);
 </script>
 <script>
 (function(){
@@ -82,20 +120,20 @@ function mount(html){var d=new DOMParser().parseFromString(html,"text/html");
     if(n.nodeName==="SCRIPT"){var s=document.createElement("script");Array.prototype.forEach.call(n.attributes,function(a){s.setAttribute(a.name,a.value);});s.text=n.text;dst.appendChild(s);}
     else dst.appendChild(document.importNode(n,true));});}
   copy(d.head,document.head);copy(d.body,document.body);logoutBtn();}
-function logoutBtn(){var b=document.createElement("button");b.type="button";b.id="pub-logout";b.title="Se déconnecter / Log out";
-  b.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span>Déconnexion</span>';
+function logoutBtn(){var b=document.createElement("button");b.type="button";b.id="pub-logout";b.title=T("logoutT");
+  b.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span>'+T("logout")+'</span>';
   b.setAttribute("style","position:fixed;top:12px;right:14px;z-index:2147483000;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.92);color:#1d2a33;font:600 13px/1 system-ui,-apple-system,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.15);cursor:pointer");
   b.addEventListener("click",function(){try{sessionStorage.removeItem(KS);}catch(e){}location.reload();});
   document.body.appendChild(b);}
 async function open_(key){var r=await fetch("data.txt",{cache:"no-store"});if(!r.ok)throw new Error("net");
-  var p=await dec(key,await r.text());say("Ouverture du carnet…");var html=new TextDecoder().decode(p);hook(key);mount(html);}
+  var p=await dec(key,await r.text());say(T("opening"));var html=new TextDecoder().decode(p);hook(key);mount(html);}
 async function tryStored(){var j=null;try{j=sessionStorage.getItem(KS);}catch(e){}
-  if(!j)return;try{var k=await crypto.subtle.importKey("jwk",JSON.parse(j),{name:"AES-GCM"},true,["decrypt"]);say("Ouverture du carnet…");await open_(k);}catch(e){try{sessionStorage.removeItem(KS);}catch(_){}say("");}}
-f.addEventListener("submit",async function(e){e.preventDefault();go.disabled=true;say("Vérification…");
+  if(!j)return;try{var k=await crypto.subtle.importKey("jwk",JSON.parse(j),{name:"AES-GCM"},true,["decrypt"]);say(T("opening"));await open_(k);}catch(e){try{sessionStorage.removeItem(KS);}catch(_){}say("");}}
+f.addEventListener("submit",async function(e){e.preventDefault();go.disabled=true;say(T("checking"));
   try{var k=await derive(pw.value);await open_(k);
     if(keep.checked){try{sessionStorage.setItem(KS,JSON.stringify(await crypto.subtle.exportKey("jwk",k)));}catch(_){}}
-  }catch(err){go.disabled=false;say(err&&err.message==="net"?"Impossible de charger le carnet, vérifiez la connexion.":"Mot de passe incorrect.",true);pw.select();}});
-if(!(window.crypto&&crypto.subtle&&window.DecompressionStream)){say("Navigateur trop ancien : utilisez une version récente de Safari, Chrome, Firefox ou Edge.",true);go.disabled=true;}
+  }catch(err){go.disabled=false;say(err&&err.message==="net"?T("net"):T("wrong"),true);pw.select();}});
+if(!(window.crypto&&crypto.subtle&&window.DecompressionStream)){say(T("old"),true);go.disabled=true;}
 else tryStored();
 })();
 </script>
